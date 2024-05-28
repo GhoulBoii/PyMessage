@@ -1,1 +1,0 @@
-/home/ghoul/.local/src/internship/python-gmail/pymail_cli.py
