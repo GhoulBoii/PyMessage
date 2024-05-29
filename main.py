@@ -4,66 +4,11 @@ import tkinter.font as tkFont
 from tkinter.filedialog import askopenfile
 from tkinter import ttk
 
-# FIX HTML, DASHBOARD, SMS
 import pandas
 from dotenv import load_dotenv
 from twilio.rest import Client
 
 import pymail.main as cli
-
-load_dotenv()
-
-# whatsapp_sent_label = tk.Label(
-#     dashboard_tk, text=f"Whatsapp Sent: {whatsapp_sent}"
-# )
-# sms_delivered_and_sent()
-# whatsapp_delivered_and_sent()
-
-# emails_text = tk.Text(dashboard_tk, height=5, width=52)
-# sms_text = tk.Text(dashboard_tk, height=5, width=52, justify=tk.CENTER)
-# whatsapp_text = tk.Text(dashboard_tk, height=5, width=52)
-# emails_text.insert(tk.END, f"{email_count[0]}\t{email_count[1]}")
-# sms_text.insert(tk.END, f"{sms_count[0]}\t{sms_count[1]}")
-# whatsapp_text.insert(tk.END, f"{whatsapp_count[0]}\t{whatsapp_count[1]}")
-
-
-# def send_whatsapp_message(to_phone: str) -> None:
-#     global FROM_NUMBER
-#     print("Send whatsapp msg")
-#     whatsapp_message = client.messages.create(
-#         body="Hello there!",
-#         from_=f"whatsapp:{FROM_NUMBER}",
-#         to=f"whatsapp:{to_phone}",
-#     )
-# def sms_delivered_and_sent(self) -> int:
-#     global sms_delivered_count
-#     global sms_sent_count
-#     delivery_receipts = (
-#         client.conversations.v1.conversations("CHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-#         .messages("IMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-#         .delivery_receipts.list(limit=20)
-#     )
-#
-#     for record in delivery_receipts:
-#         if record.status == "delivered":
-#             sms_delivered_count += sms_delivered_count + 1
-#         elif record.status == "sent":
-#             sms_sent_count += sms_sent_count + 1
-#
-# def whatsapp_delivered_and_sent():
-#     global sms_delivered_count
-#     global sms_sent_count
-#     delivery_receipts = (
-#         client.conversations.v1.conversations("CHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-#         .messages("IMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-#         .delivery_receipts.list(limit=20)
-#     )
-#
-#     for record in delivery_receipts:
-#         if record.status == "delivered":
-#             sms_delivered_count += sms_delivered_count + 1
-#         elif record.status == "read":
-#             sms_sent_count += sms_sent_count + 1
 
 
 class message_sending:
@@ -74,10 +19,9 @@ class message_sending:
         self.number_from = number_from
 
     def send_email(self, email_to: str) -> None:
-        print("Sending email")
         PLAYIT_URL = os.getenv("PLAYIT_URL")
-        email_subject = "Test Email"
-        email_body = "Hello From Python!"
+        email_subject = os.getenv("EMAIL_SUBJECT")
+        email_body = os.getenv("EMAIL_BODY")
         EMAIL_HTML = f"""
         <html>
             <body>
@@ -86,7 +30,7 @@ class message_sending:
         </html>
             """
 
-        cli.gmail_send_message(
+        message_id = cli.send_message(
             self.email_from,
             email_to,
             email_subject,
@@ -94,22 +38,24 @@ class message_sending:
             EMAIL_HTML,
         )
 
+        cli.add_label(message_id, "TESTLABEL")
+
     def send_sms(self, number_to: str) -> None:
         TWILIO_SID = os.getenv("TWILIO_SID")
         TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
         client = Client(TWILIO_SID, TWILIO_TOKEN)
-        sms_body = "Hello From Python"
+        sms_body = os.getenv("SMS_BODY")
 
-        print("Sending sms")
+        print("Sending SMS")
         message = client.messages.create(
             body=sms_body,
-            from_=self.number_from,  # Your Twilio phone number
-            to=number_to,  # Recipient's phone number
+            from_=self.number_from,
+            to=number_to,
         )
         self.sms_sid.append(message.sid)
 
     def send_all(self, csvFile):
-        # FIX: store to number and email to in dictionary and then send
+        # FIX: store to number and email to in list and then send
         for index, row in csvFile.iterrows():
             number_to = row["Phone"]
             email_to = row["Email"]
@@ -139,22 +85,22 @@ class delivery_sent_messages:
     sms_sent_count = 0
     email_seen_count = 0
     sms_delivered_count = 0
+    phone_numbers = []
 
     def emails_delivered_and_sent(self, log_file: str) -> int:
         with open(log_file, "r") as file:
             lines = file.readlines()
 
-            # Filter lines containing '200'
             lines_with_200 = [
                 line.strip() for line in lines if line.endswith("200 -\n")
             ]
 
-            # Print filtered lines
             for line in lines_with_200:
                 self.email_seen_count += 1
         return self.email_seen_count
 
     def sms_delivered_and_sent(self, message_sending) -> int:
+        global phone_numbers
         TWILIO_SID = os.getenv("TWILIO_SID")
         TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
         client = Client(TWILIO_SID, TWILIO_TOKEN)
@@ -163,8 +109,21 @@ class delivery_sent_messages:
             message = client.messages(sms_sid).fetch()
             if message.status == "delivered":
                 self.sms_delivered_count += 1
+                self.phone_numbers.append(message.to)
 
         return self.sms_delivered_count
+
+    def export_sms_to_csv(self, csvFile) -> None:
+        df = pandas.DataFrame(csvFile)
+        self.phone_numbers.append("+91 87654 32109")
+        for phone_number in self.phone_numbers:
+            filtered_df = df[df["Phone"] == phone_number][["Name", "Course Name"]]
+            filtered_df.to_csv(
+                "filtered_data.csv",
+                index=False,
+                mode="a",
+                header=not os.path.exists("filtered_data.csv"),
+            )
 
 
 class gui:
@@ -240,8 +199,6 @@ class gui:
         dashboard_button.grid(row=4, column=1, pady=5)
         theme_changer_button.place(relx=0.9, rely=0.9, anchor="nw")
 
-    # Defining a function to toggle
-    # between light and dark theme
     def light_and_dark_toggle(
         self,
         text_label,
@@ -291,6 +248,8 @@ class gui:
         email_seen = sent_message_class.emails_delivered_and_sent(log_file)
         sms_delivered = sent_message_class.sms_delivered_and_sent(message_sending_obj)
 
+        sent_message_class.export_sms_to_csv(self.csvFile)
+
         email_label = tk.Label(dashboard_tk, text="Emails Sent & Opened By User")
         sms_label = tk.Label(dashboard_tk, text="SMS Sent & Received")
         whatsapp_label = tk.Label(dashboard_tk, text="WhatsApp messages Sent & Read")
@@ -319,10 +278,28 @@ class gui:
 
 
 def main():
+    load_dotenv()
     FROM_EMAIL = os.getenv("FROM_EMAIL")
     FROM_NUMBER = os.getenv("FROM_NUMBER")
-    if not all([FROM_EMAIL, FROM_NUMBER]):
-        # Raise an exception if any variable is None
+
+    TWILIO_SID = os.getenv("TWILIO_SID")
+    TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
+    PLAYIT_URL = os.getenv("PLAYIT_URL")
+    EMAIL_SUBJECT = os.getenv("EMAIL_SUBJECT")
+    EMAIL_BODY = os.getenv("EMAIL_BODY")
+    SMS_BODY = os.getenv("SMS_BODY")
+    if not all(
+        [
+            FROM_EMAIL,
+            FROM_NUMBER,
+            TWILIO_SID,
+            TWILIO_TOKEN,
+            PLAYIT_URL,
+            EMAIL_SUBJECT,
+            EMAIL_BODY,
+            SMS_BODY,
+        ]
+    ):
         raise ValueError("One or more required environment variables are missing.")
 
     bg_colour = "black"
@@ -334,3 +311,56 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# whatsapp_sent_label = tk.Label(
+#     dashboard_tk, text=f"Whatsapp Sent: {whatsapp_sent}"
+# )
+# sms_delivered_and_sent()
+# whatsapp_delivered_and_sent()
+
+# emails_text = tk.Text(dashboard_tk, height=5, width=52)
+# sms_text = tk.Text(dashboard_tk, height=5, width=52, justify=tk.CENTER)
+# whatsapp_text = tk.Text(dashboard_tk, height=5, width=52)
+# emails_text.insert(tk.END, f"{email_count[0]}\t{email_count[1]}")
+# sms_text.insert(tk.END, f"{sms_count[0]}\t{sms_count[1]}")
+# whatsapp_text.insert(tk.END, f"{whatsapp_count[0]}\t{whatsapp_count[1]}")
+
+
+# def send_whatsapp_message(to_phone: str) -> None:
+#     global FROM_NUMBER
+#     print("Send whatsapp msg")
+#     whatsapp_message = client.messages.create(
+#         body="Hello there!",
+#         from_=f"whatsapp:{FROM_NUMBER}",
+#         to=f"whatsapp:{to_phone}",
+#     )
+# def sms_delivered_and_sent(self) -> int:
+#     global sms_delivered_count
+#     global sms_sent_count
+#     delivery_receipts = (
+#         client.conversations.v1.conversations("CHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+#         .messages("IMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+#         .delivery_receipts.list(limit=20)
+#     )
+#
+#     for record in delivery_receipts:
+#         if record.status == "delivered":
+#             sms_delivered_count += sms_delivered_count + 1
+#         elif record.status == "sent":
+#             sms_sent_count += sms_sent_count + 1
+#
+# def whatsapp_delivered_and_sent():
+#     global sms_delivered_count
+#     global sms_sent_count
+#     delivery_receipts = (
+#         client.conversations.v1.conversations("CHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+#         .messages("IMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+#         .delivery_receipts.list(limit=20)
+#     )
+#
+#     for record in delivery_receipts:
+#         if record.status == "delivered":
+#             sms_delivered_count += sms_delivered_count + 1
+#         elif record.status == "read":
+#             sms_sent_count += sms_sent_count + 1
