@@ -15,8 +15,21 @@ import pymail.main as cli
 
 class message_sending:
     sms_sid = []
-    sent_email_addresses = []
-    sent_phone_numbers = []
+
+    sent_email_addresses = {}
+
+    sent_sms = {}
+    seen_sms = []
+
+    sent_whatsapp_numbers = {}
+    seen_whatsapp_numbers = {}
+
+    email_sent_count = 0
+    sms_sent_count = 0
+    whatsapp_sent_count = 0
+
+    email_seen_count = 0
+    sms_delivered_count = 0
 
     def __init__(self, email_from: str, number_from: str) -> None:
         self.email_from = email_from
@@ -45,14 +58,28 @@ class message_sending:
                 )
 
                 cli.add_label(message["id"], label_name)
-                self.sent_email_addresses.append(message)
+                cli.check_email_bounced_status(message["id"])
+                self.sent_email_addresses[email_to] = "Sent"
                 print("Email sent to:", email_to)
 
             except Exception as e:
                 self.sent_email_addresses[email_to] = "Not Sent"
                 print(f"Error: {e}")
             else:
-                delivery_sent_messages.email_sent_count += 1
+                self.email_sent_count += 1
+
+    def seen_emails(self, log_file: str) -> int:
+        LOG_FILE = "email_seen.log"
+        with open(LOG_FILE, "r") as file:
+            lines = file.readlines()
+
+            lines_with_200 = [
+                line.strip() for line in lines if line.endswith("200 -\n")
+            ]
+
+            for line in lines_with_200:
+                self.email_seen_count += 1
+        return self.email_seen_count
 
     def send_sms(self, numbers_to: list[str]) -> None:
         TWILIO_SID = os.getenv("TWILIO_SID")
@@ -68,10 +95,23 @@ class message_sending:
                     to=number_to,
                 )
                 self.sms_sid.append(message.sid)
+                self.sent_sms[number_to] = "Sent"
             except Exception as e:
+                self.sent_sms[number_to] = "Not Sent"
                 print(f"Error: {e}")
             else:
-                delivery_sent_messages.sms_sent_count += 1
+                self.sms_sent_count += 1
+
+    def delivered_sms(self) -> int:
+        TWILIO_SID = os.getenv("TWILIO_SID")
+        TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
+        client = Client(TWILIO_SID, TWILIO_TOKEN)
+        sms_sid_dic = self.sms_sid
+        for sms_sid in sms_sid_dic:
+            message = client.messages(sms_sid).fetch()
+            if message.status == "delivered":
+                self.sms_delivered_count += 1
+                self.seen_sms.append(message.to)
 
     def send_whatsapp_message(self, numbers_to: list[str]) -> None:
         INTERAKT_API = os.getenv("INTERAKT_API")
@@ -97,14 +137,14 @@ class message_sending:
                         },
                     }
                 )
-                print(payload)
-
                 response = requests.request("POST", url, headers=headers, data=payload)
                 print(response.text)
+                self.sent_whatsapp_numbers[number_to] = "Sent"
             except Exception as e:
+                self.sent_whatsapp_numbers[number_to] = "Not Sent"
                 print(f"Error: {e}")
             else:
-                delivery_sent_messages.whatsapp_sent_count += 1
+                self.whatsapp_sent_count += 1
 
     def create_database(self, csvFile) -> None:
         csvFile["Email Sent"] = csvFile["Email"].map(self.sent_email_addresses)
@@ -127,44 +167,9 @@ class message_sending:
         self.send_sms(numbers_to)
 
         # Send Whatsapp Msg
-        self.send_whatsapp_message(numbers_to)
+        # self.send_whatsapp_message(numbers_to)
 
-
-class delivery_sent_messages:
-    email_sent_count = 0
-    sms_sent_count = 0
-    whatsapp_sent_count = 0
-
-    email_seen_count = 0
-    sms_delivered_count = 0
-
-    delivered_phone_numbers = []
-
-    def emails_seen(self, log_file: str) -> int:
-        with open(log_file, "r") as file:
-            lines = file.readlines()
-
-            lines_with_200 = [
-                line.strip() for line in lines if line.endswith("200 -\n")
-            ]
-
-            for line in lines_with_200:
-                self.email_seen_count += 1
-        return self.email_seen_count
-
-    def sms_delivered(self, message_sending) -> int:
-        TWILIO_SID = os.getenv("TWILIO_SID")
-        TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
-        client = Client(TWILIO_SID, TWILIO_TOKEN)
-        sms_sid_dic = message_sending.sms_sid
-        for sms_sid in sms_sid_dic:
-            message = client.messages(sms_sid).fetch()
-            if message.status == "delivered":
-                self.sms_delivered_count += 1
-                self.delivered_phone_numbers.append(message.to)
-
-        return self.sms_delivered_count
-
+        self.create_database(csvFile)
 
 
 class gui:
