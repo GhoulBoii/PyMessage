@@ -126,9 +126,10 @@ class delivery_sent_messages:
 
     email_seen_count = 0
     sms_delivered_count = 0
-    phone_numbers = []
 
-    def emails_delivered_and_sent(self, log_file: str) -> int:
+    delivered_phone_numbers = []
+
+    def emails_seen(self, log_file: str) -> int:
         with open(log_file, "r") as file:
             lines = file.readlines()
 
@@ -140,8 +141,7 @@ class delivery_sent_messages:
                 self.email_seen_count += 1
         return self.email_seen_count
 
-    def sms_delivered_and_sent(self, message_sending) -> int:
-        global phone_numbers
+    def sms_delivered(self, message_sending) -> int:
         TWILIO_SID = os.getenv("TWILIO_SID")
         TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
         client = Client(TWILIO_SID, TWILIO_TOKEN)
@@ -150,7 +150,7 @@ class delivery_sent_messages:
             message = client.messages(sms_sid).fetch()
             if message.status == "delivered":
                 self.sms_delivered_count += 1
-                self.phone_numbers.append(message.to)
+                self.delivered_phone_numbers.append(message.to)
 
         return self.sms_delivered_count
 
