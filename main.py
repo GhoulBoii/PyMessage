@@ -303,7 +303,49 @@ class gui:
         sms_sent_label.grid(row=1, column=2)
         whatsapp_sent_label.grid(row=1, column=4)
 
+    def set_threads_text(self, text_view, to_email) -> None:
+        result = cli.get_threads("PyMessage", to_email)
+        if not result:
+            raise Exception("No valid threads returned.")
+        formatted_str = ""
+        for email in result:
+            formatted_str += f"{email["subject"]}\n\n{email["body"]}\n\n{"-"*50}\n\n"
+
+        text_view.delete("1.0", tk.END)
+        text_view.insert("1.0", formatted_str)
+
+    def history(self):
+        history_tk = tk.Toplevel()
+        history_tk.rowconfigure(0, weight=1)
+        history_tk.rowconfigure(1, weight=1)
+        history_tk.rowconfigure(2, weight=5)
+        history_tk.rowconfigure(3, weight=1)
+        history_tk.rowconfigure(4, weight=1)
+        history_tk.columnconfigure(0, weight=1)
+        history_tk.columnconfigure(1, weight=1)
+        history_tk.columnconfigure(2, weight=1)
+
+        username = tk.StringVar()
+
+        text_label = tk.Label(history_tk, font=tkFont.Font(size=24), text="History")
+        text_view = tk.Text(history_tk)
+        user_label = tk.Label(history_tk, text="Select a User: ")
+        user_combobox = ttk.Combobox(history_tk, width=27, textvariable=username)
+        # user_combobox['values'] =
+        to_email = self.get_email(username)
+        email_button = tk.Button(
+            history_tk,
+            text="Get Threads",
+            command=lambda: self.set_threads_text(text_view, to_email),
+        )
         whatsapp_button = tk.Button(history_tk, text="Get WhatsApp Messages")
+
+        text_label.grid(row=0, column=1, pady=30)
+        user_label.grid(row=1, column=0)
+        user_combobox.grid(row=2, column=0)
+        email_button.grid(row=3, column=0)
+        whatsapp_button.grid(row=3, column=2, padx=5)
+        text_view.grid(row=4, column=1)
 
 
 def main():
