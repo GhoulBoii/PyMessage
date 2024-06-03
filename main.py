@@ -106,6 +106,14 @@ class message_sending:
             else:
                 delivery_sent_messages.whatsapp_sent_count += 1
 
+    def create_database(self, csvFile) -> None:
+        csvFile["Email Sent"] = csvFile["Email"].map(self.sent_email_addresses)
+        csvFile["SMS Sent"] = csvFile["Phone"].map(self.sent_sms)
+        csvFile["SMS Delivered"] = csvFile["Phone"].map(self.delivered_sms)
+        csvFile["WhatsApp Sent"] = csvFile["Phone"].map(self.sent_whatsapp_numbers)
+        csvFile["WhatsApp Seen"] = csvFile["Phone"].map(self.seen_whatsapp_numbers)
+        csvFile.to_csv("output.csv", index=False)
+
     def send_all(self, csvFile):
         label_name = "PyMessage"
         cli.create_label(label_name)
@@ -157,17 +165,6 @@ class delivery_sent_messages:
 
         return self.sms_delivered_count
 
-    def export_sms_to_csv(self, csvFile) -> None:
-        df = pandas.DataFrame(csvFile)
-        self.phone_numbers.append("+91 87654 32109")
-        for phone_number in self.phone_numbers:
-            filtered_df = df[df["Phone"] == phone_number][["Name", "Course Name"]]
-            filtered_df.to_csv(
-                "filtered_data.csv",
-                index=False,
-                mode="a",
-                header=not os.path.exists("filtered_data.csv"),
-            )
 
 
 class gui:
