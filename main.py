@@ -15,6 +15,8 @@ import pymail.main as cli
 
 class message_sending:
     sms_sid = []
+    sent_email_addresses = []
+    sent_phone_numbers = []
 
     def __init__(self, email_from: str, number_from: str) -> None:
         self.email_from = email_from
@@ -44,19 +46,29 @@ class message_sending:
             cli.add_label(message["id"], label_name)
             self.sent_email_addresses.append(email_to)
 
-    def send_sms(self, number_to: str) -> None:
-        TWILIO_SID = os.getenv("TWILIO_SID")
-        TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
-        client = Client(TWILIO_SID, TWILIO_TOKEN)
-        sms_body = os.getenv("SMS_BODY")
+        except Exception as e:
+            print(f"Error: {e}")
+        else:
+            delivery_sent_messages.email_sent_count += 1
 
-        print("Sending SMS")
-        message = client.messages.create(
-            body=sms_body,
-            from_=self.number_from,
-            to=number_to,
-        )
-        self.sms_sid.append(message.sid)
+    def send_sms(self, number_to: str) -> None:
+        try:
+            TWILIO_SID = os.getenv("TWILIO_SID")
+            TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
+            client = Client(TWILIO_SID, TWILIO_TOKEN)
+            sms_body = os.getenv("SMS_BODY")
+
+            print("Sending SMS")
+            message = client.messages.create(
+                body=sms_body,
+                from_=self.number_from,
+                to=number_to,
+            )
+            self.sms_sid.append(message.sid)
+        except Exception as e:
+            print(f"Error: {e}")
+        else:
+            delivery_sent_messages.sms_sent_count += 1
 
     def send_whatsapp_message(self, number_to: str) -> None:
         try:
