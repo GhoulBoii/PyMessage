@@ -160,7 +160,6 @@ class gui:
         self.root = root
         self.content = tk.Frame(root)
         self.bg_colour = bg_colour
-        self.switch_value = False
         self.theme_switcher_text = "🌞"
 
         self.root.title("PyMessage")
@@ -209,53 +208,50 @@ class gui:
             text="Open Dashboard",
             command=lambda: self.dashboard(email_from, number_from),
         )
-        theme_changer_button = tk.Button(
-            self.root,
+        history_button = tk.Button(
+            self.content,
             bg=self.bg_colour,
-            text=self.theme_switcher_text,
-            command=lambda: self.light_and_dark_toggle(
-                text_label,
-                input_button,
-                report_button,
-                dashboard_button,
-                theme_changer_button,
-            ),
+            text="Get History",
+            command=lambda: self.history(),
         )
-
+        #
+        # theme_changer_button = tk.Button(
+        #     self.root,
+        #     bg=self.bg_colour,
+        #     text=self.theme_switcher_text,
+        #     command=lambda: self.light_and_dark_toggle(self.root, widget_list),
+        # )
+        #
+        # widget_list = [
+        #     text_label,
+        #     input_button,
+        #     report_button,
+        #     dashboard_button,
+        #     history_button,
+        #     theme_changer_button,
+        # ]
+        #
         text_label.grid(row=1, column=1, pady=30)
         input_button.grid(row=2, column=1, pady=5)
         report_button.grid(row=3, column=1, pady=5)
         dashboard_button.grid(row=4, column=1, pady=5)
-        theme_changer_button.place(relx=0.9, rely=0.9, anchor="nw")
+        history_button.grid(row=5, column=1, pady=5)
+        # theme_changer_button.place(relx=0.9, rely=0.9, anchor="nw")
 
-    def light_and_dark_toggle(
-        self,
-        text_label,
-        input_button,
-        report_button,
-        dashboard_button,
-        theme_changer_button,
-    ):
-        if self.switch_value:
-            bg_colour = "black"
-            fg_colour = "white"
-            self.theme_switcher_text = "🌞"
-            self.switch_value = False
-        else:
-            bg_colour = "white"
-            fg_colour = "black"
-            self.theme_switcher_text = "🌚"
-            self.switch_value = True
-
-        self.root.config(bg=bg_colour)
-        self.content.config(bg=bg_colour)
-        text_label.config(fg=fg_colour, bg=bg_colour)
-        input_button.config(fg=fg_colour, bg=bg_colour)
-        report_button.config(fg=fg_colour, bg=bg_colour)
-        dashboard_button.config(fg=fg_colour, bg=bg_colour)
-        theme_changer_button.config(
-            fg=fg_colour, bg=bg_colour, text=self.theme_switcher_text
-        )
+    # def light_and_dark_toggle(self, root, widget_list: list) -> None:
+    #     if self.bg_colour == "white":
+    #         self.bg_colour = "black"
+    #         fg_colour = "white"
+    #         self.theme_switcher_text = "🌞"
+    #     else:
+    #         self.bg_colour = "white"
+    #         fg_colour = "black"
+    #         self.theme_switcher_text = "🌚"
+    #
+    #     root.config(bg=self.bg_colour)
+    #     self.content.config(bg=self.bg_colour)
+    #     for widget in widget_list:
+    #         widget.config(fg=fg_colour, bg=self.bg_colour)
 
     def dashboard(self, email_from, number_from):
         # Configuring Dashboard
