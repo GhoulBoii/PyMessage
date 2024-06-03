@@ -2,8 +2,8 @@ import json
 import os
 import tkinter as tk
 import tkinter.font as tkFont
-from tkinter.filedialog import askopenfile
 from tkinter import ttk
+from tkinter.filedialog import askopenfile
 
 import pandas
 import requests
