@@ -171,16 +171,12 @@ class delivery_sent_messages:
 
 
 class gui:
-    def __init__(self, root, bg_colour) -> None:
+    def __init__(self, root) -> None:
         self.root = root
         self.content = tk.Frame(root)
-        self.bg_colour = bg_colour
-        self.theme_switcher_text = "🌞"
 
         self.root.title("PyMessage")
-        self.root.config(bg=bg_colour)
         self.content.place(relx=0.5, rely=0.5, anchor="center")
-        self.content.config(bg=bg_colour)
 
     def input_excel(self):
         file = askopenfile(
@@ -201,72 +197,34 @@ class gui:
         sender1 = message_sending(email_from, number_from)
         text_label = tk.Label(
             self.content,
-            bg=self.bg_colour,
             font=tkFont.Font(size=24),
             text="Welcome to PyMessage!",
         )
         input_button = tk.Button(
             self.content,
-            bg=self.bg_colour,
             text="Input",
             command=lambda: self.input_excel(),
         )
         report_button = tk.Button(
             self.content,
-            bg=self.bg_colour,
             text="Run Report",
             command=lambda: sender1.send_all(self.csvFile),
         )
         dashboard_button = tk.Button(
             self.content,
-            bg=self.bg_colour,
             text="Open Dashboard",
             command=lambda: self.dashboard(email_from, number_from),
         )
         history_button = tk.Button(
             self.content,
-            bg=self.bg_colour,
             text="Get History",
             command=lambda: self.history(),
         )
-        #
-        # theme_changer_button = tk.Button(
-        #     self.root,
-        #     bg=self.bg_colour,
-        #     text=self.theme_switcher_text,
-        #     command=lambda: self.light_and_dark_toggle(self.root, widget_list),
-        # )
-        #
-        # widget_list = [
-        #     text_label,
-        #     input_button,
-        #     report_button,
-        #     dashboard_button,
-        #     history_button,
-        #     theme_changer_button,
-        # ]
-        #
         text_label.grid(row=1, column=1, pady=30)
         input_button.grid(row=2, column=1, pady=5)
         report_button.grid(row=3, column=1, pady=5)
         dashboard_button.grid(row=4, column=1, pady=5)
         history_button.grid(row=5, column=1, pady=5)
-        # theme_changer_button.place(relx=0.9, rely=0.9, anchor="nw")
-
-    # def light_and_dark_toggle(self, root, widget_list: list) -> None:
-    #     if self.bg_colour == "white":
-    #         self.bg_colour = "black"
-    #         fg_colour = "white"
-    #         self.theme_switcher_text = "🌞"
-    #     else:
-    #         self.bg_colour = "white"
-    #         fg_colour = "black"
-    #         self.theme_switcher_text = "🌚"
-    #
-    #     root.config(bg=self.bg_colour)
-    #     self.content.config(bg=self.bg_colour)
-    #     for widget in widget_list:
-    #         widget.config(fg=fg_colour, bg=self.bg_colour)
 
     def dashboard(self, email_from, number_from):
         # Configuring Dashboard
@@ -393,9 +351,8 @@ def main():
     ):
         raise ValueError("One or more required environment variables are missing.")
 
-    bg_colour = "black"
     root = tk.Tk()
-    main_window = gui(root, bg_colour)
+    main_window = gui(root)
     main_window.create_widgets(FROM_EMAIL, FROM_NUMBER)
     root.mainloop()
 
