@@ -22,101 +22,104 @@ class message_sending:
         self.email_from = email_from
         self.number_from = number_from
 
-    def send_email(self, email_to: str, label_name: str) -> None:
-        try:
-            PLAYIT_URL = os.getenv("PLAYIT_URL")
-            email_subject = os.getenv("EMAIL_SUBJECT")
-            email_body = os.getenv("EMAIL_BODY")
-            EMAIL_HTML = f"""
-            <html>
-                <body>
-                    <img src="{PLAYIT_URL}/image.png">
-                </body>
-            </html>
-                """
+    def send_email(self, emails_to: list[str], label_name: str) -> None:
+        PLAYIT_URL = os.getenv("PLAYIT_URL")
+        EMAIL_SUBJECT = os.getenv("EMAIL_SUBJECT")
+        EMAIL_BODY = os.getenv("EMAIL_BODY")
+        EMAIL_HTML = f"""
+        <html>
+            <body>
+                <img src="{PLAYIT_URL}/image.png">
+            </body>
+        </html>
+            """
 
-            message = cli.send_message(
-                self.email_from,
-                email_to,
-                email_subject,
-                email_body,
-                EMAIL_HTML,
-            )
+        for email_to in emails_to:
+            try:
+                message = cli.send_message(
+                    self.email_from,
+                    email_to,
+                    EMAIL_SUBJECT,
+                    EMAIL_BODY,
+                    EMAIL_HTML,
+                )
 
-            cli.add_label(message["id"], label_name)
-            self.sent_email_addresses.append(email_to)
+                cli.add_label(message["id"], label_name)
+                self.sent_email_addresses.append(message)
+                print("Email sent to:", email_to)
 
-        except Exception as e:
-            print(f"Error: {e}")
-        else:
-            delivery_sent_messages.email_sent_count += 1
+            except Exception as e:
+                self.sent_email_addresses[email_to] = "Not Sent"
+                print(f"Error: {e}")
+            else:
+                delivery_sent_messages.email_sent_count += 1
 
-    def send_sms(self, number_to: str) -> None:
-        try:
-            TWILIO_SID = os.getenv("TWILIO_SID")
-            TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
-            client = Client(TWILIO_SID, TWILIO_TOKEN)
-            sms_body = os.getenv("SMS_BODY")
+    def send_sms(self, numbers_to: list[str]) -> None:
+        TWILIO_SID = os.getenv("TWILIO_SID")
+        TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
+        client = Client(TWILIO_SID, TWILIO_TOKEN)
+        sms_body = os.getenv("SMS_BODY")
+        for number_to in numbers_to:
+            try:
+                print("Sending SMS")
+                message = client.messages.create(
+                    body=sms_body,
+                    from_=self.number_from,
+                    to=number_to,
+                )
+                self.sms_sid.append(message.sid)
+            except Exception as e:
+                print(f"Error: {e}")
+            else:
+                delivery_sent_messages.sms_sent_count += 1
 
-            print("Sending SMS")
-            message = client.messages.create(
-                body=sms_body,
-                from_=self.number_from,
-                to=number_to,
-            )
-            self.sms_sid.append(message.sid)
-        except Exception as e:
-            print(f"Error: {e}")
-        else:
-            delivery_sent_messages.sms_sent_count += 1
+    def send_whatsapp_message(self, numbers_to: list[str]) -> None:
+        INTERAKT_API = os.getenv("INTERAKT_API")
+        TEMPLATE_NAME = os.getenv("TEMPLATE_NAME")
+        TEMPLATE_BODY_VALUES = os.getenv("TEMPLATE_BODY_VALUES")
+        url = "https://api.interakt.ai/v1/public/message/"
+        headers = {
+            "Authorization": "Basic {{" + INTERAKT_API + "}}",
+            "Content-Type": "application/json",
+        }
+        for number_to in numbers_to:
+            try:
+                payload = json.dumps(
+                    {
+                        "countryCode": "+91",
+                        "phoneNumber": f"{number_to}",
+                        "callbackData": "some text here",
+                        "type": "Template",
+                        "template": {
+                            "name": f"{TEMPLATE_NAME}",
+                            "languageCode": "en",
+                            "bodyValues": f"{TEMPLATE_BODY_VALUES}",
+                        },
+                    }
+                )
+                print(payload)
 
-    def send_whatsapp_message(self, number_to: str) -> None:
-        try:
-            INTERAKT_API = os.getenv("INTERAKT_API")
-            TEMPLATE_NAME = os.getenv("TEMPLATE_NAME")
-            TEMPLATE_BODY_VALUES = os.getenv("TEMPLATE_BODY_VALUES")
-            url = "https://api.interakt.ai/v1/public/message/"
-            payload = json.dumps(
-                {
-                    "countryCode": "+91",
-                    "phoneNumber": f"{number_to}",
-                    "callbackData": "some text here",
-                    "type": "Template",
-                    "template": {
-                        "name": f"{TEMPLATE_NAME}",
-                        "languageCode": "en",
-                        "bodyValues": f"{TEMPLATE_BODY_VALUES}",
-                    },
-                }
-            )
-            print(payload)
-            headers = {
-                "Authorization": "Basic {{" + INTERAKT_API + "}}",
-                "Content-Type": "application/json",
-            }
-
-            response = requests.request("POST", url, headers=headers, data=payload)
-            print(response.text)
-        except Exception as e:
-            print(f"Error: {e}")
-        else:
-            delivery_sent_messages.whatsapp_sent_count += 1
+                response = requests.request("POST", url, headers=headers, data=payload)
+                print(response.text)
+            except Exception as e:
+                print(f"Error: {e}")
+            else:
+                delivery_sent_messages.whatsapp_sent_count += 1
 
     def send_all(self, csvFile):
         label_name = "PyMessage"
         cli.create_label(label_name)
-        for index, row in csvFile.iterrows():
-            number_to = row["Phone"]
-            email_to = row["Email"]
+        numbers_to = csvFile["Phone"].tolist()
+        emails_to = csvFile["Email"].tolist()
 
-            # Send Email
-            # self.send_email(email_to, label_name)
+        # Send Email
+        self.send_email(emails_to, label_name)
 
-            # Send SMS
-            # self.send_sms(number_to)
+        # Send SMS
+        self.send_sms(numbers_to)
 
-            # Send Whatsapp Msg
-            # self.send_whatsapp_message(number_to)
+        # Send Whatsapp Msg
+        self.send_whatsapp_message(numbers_to)
 
 
 class delivery_sent_messages:
