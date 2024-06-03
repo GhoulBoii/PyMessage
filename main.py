@@ -1,3 +1,4 @@
+import json
 import os
 import tkinter as tk
 import tkinter.font as tkFont
@@ -5,6 +6,7 @@ from tkinter.filedialog import askopenfile
 from tkinter import ttk
 
 import pandas
+import requests
 from dotenv import load_dotenv
 from twilio.rest import Client
 
@@ -54,6 +56,38 @@ class message_sending:
         )
         self.sms_sid.append(message.sid)
 
+    def send_whatsapp_message(self, number_to: str) -> None:
+        try:
+            INTERAKT_API = os.getenv("INTERAKT_API")
+            TEMPLATE_NAME = os.getenv("TEMPLATE_NAME")
+            TEMPLATE_BODY_VALUES = os.getenv("TEMPLATE_BODY_VALUES")
+            url = "https://api.interakt.ai/v1/public/message/"
+            payload = json.dumps(
+                {
+                    "countryCode": "+91",
+                    "phoneNumber": f"{number_to}",
+                    "callbackData": "some text here",
+                    "type": "Template",
+                    "template": {
+                        "name": f"{TEMPLATE_NAME}",
+                        "languageCode": "en",
+                        "bodyValues": f"{TEMPLATE_BODY_VALUES}",
+                    },
+                }
+            )
+            print(payload)
+            headers = {
+                "Authorization": "Basic {{" + INTERAKT_API + "}}",
+                "Content-Type": "application/json",
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+            print(response.text)
+        except Exception as e:
+            print(f"Error: {e}")
+        else:
+            delivery_sent_messages.whatsapp_sent_count += 1
+
     def send_all(self, csvFile):
         # FIX: store to number and email to in list and then send
         for index, row in csvFile.iterrows():
@@ -61,28 +95,20 @@ class message_sending:
             email_to = row["Email"]
 
             # Send Email
-            try:
-                self.send_email(email_to)
-            except Exception as e:
-                print(f"Error: {e}")
-            else:
-                delivery_sent_messages.email_sent_count += 1
+            # self.send_email(email_to, label_name)
 
             # Send SMS
-            try:
-                self.send_sms(number_to)
-            except Exception as e:
-                print(f"Error: {e}")
-            else:
-                delivery_sent_messages.sms_sent_count += 1
+            # self.send_sms(number_to)
 
             # Send Whatsapp Msg
-            # send_whatsapp_message(self.to_phone)
+            # self.send_whatsapp_message(number_to)
 
 
 class delivery_sent_messages:
     email_sent_count = 0
     sms_sent_count = 0
+    whatsapp_sent_count = 0
+
     email_seen_count = 0
     sms_delivered_count = 0
     phone_numbers = []
@@ -242,6 +268,7 @@ class gui:
         message_sending_obj = message_sending(email_from, number_from)
         email_sent = delivery_sent_messages.email_sent_count
         sms_sent = delivery_sent_messages.sms_sent_count
+        whatsapp_sent = delivery_sent_messages.whatsapp_sent_count
 
         log_file = "email_seen.log"
         sent_message_class = delivery_sent_messages()
@@ -259,8 +286,9 @@ class gui:
         )
         sms_sent_label = tk.Label(
             dashboard_tk, text=f"SMS Sent: {sms_sent}\nSMS Delivered: {sms_delivered}"
+        whatsapp_sent_label = tk.Label(
+            dashboard_tk, text=f"WhatsApp Messages Sent: {whatsapp_sent}"
         )
-        whatsapp_sent_label = tk.Label(dashboard_tk, text="WIP")
 
         # Separator object
         separator1 = ttk.Separator(dashboard_tk, orient="vertical")
@@ -276,6 +304,8 @@ class gui:
         sms_sent_label.grid(row=1, column=2)
         whatsapp_sent_label.grid(row=1, column=4)
 
+        whatsapp_button = tk.Button(history_tk, text="Get WhatsApp Messages")
+
 
 def main():
     load_dotenv()
@@ -288,6 +318,7 @@ def main():
     EMAIL_SUBJECT = os.getenv("EMAIL_SUBJECT")
     EMAIL_BODY = os.getenv("EMAIL_BODY")
     SMS_BODY = os.getenv("SMS_BODY")
+    INTERAKT_API = os.getenv("INTERAKT_API")
     if not all(
         [
             FROM_EMAIL,
@@ -298,6 +329,7 @@ def main():
             EMAIL_SUBJECT,
             EMAIL_BODY,
             SMS_BODY,
+            INTERAKT_API,
         ]
     ):
         raise ValueError("One or more required environment variables are missing.")
@@ -311,56 +343,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# whatsapp_sent_label = tk.Label(
-#     dashboard_tk, text=f"Whatsapp Sent: {whatsapp_sent}"
-# )
-# sms_delivered_and_sent()
-# whatsapp_delivered_and_sent()
-
-# emails_text = tk.Text(dashboard_tk, height=5, width=52)
-# sms_text = tk.Text(dashboard_tk, height=5, width=52, justify=tk.CENTER)
-# whatsapp_text = tk.Text(dashboard_tk, height=5, width=52)
-# emails_text.insert(tk.END, f"{email_count[0]}\t{email_count[1]}")
-# sms_text.insert(tk.END, f"{sms_count[0]}\t{sms_count[1]}")
-# whatsapp_text.insert(tk.END, f"{whatsapp_count[0]}\t{whatsapp_count[1]}")
-
-
-# def send_whatsapp_message(to_phone: str) -> None:
-#     global FROM_NUMBER
-#     print("Send whatsapp msg")
-#     whatsapp_message = client.messages.create(
-#         body="Hello there!",
-#         from_=f"whatsapp:{FROM_NUMBER}",
-#         to=f"whatsapp:{to_phone}",
-#     )
-# def sms_delivered_and_sent(self) -> int:
-#     global sms_delivered_count
-#     global sms_sent_count
-#     delivery_receipts = (
-#         client.conversations.v1.conversations("CHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-#         .messages("IMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-#         .delivery_receipts.list(limit=20)
-#     )
-#
-#     for record in delivery_receipts:
-#         if record.status == "delivered":
-#             sms_delivered_count += sms_delivered_count + 1
-#         elif record.status == "sent":
-#             sms_sent_count += sms_sent_count + 1
-#
-# def whatsapp_delivered_and_sent():
-#     global sms_delivered_count
-#     global sms_sent_count
-#     delivery_receipts = (
-#         client.conversations.v1.conversations("CHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-#         .messages("IMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-#         .delivery_receipts.list(limit=20)
-#     )
-#
-#     for record in delivery_receipts:
-#         if record.status == "delivered":
-#             sms_delivered_count += sms_delivered_count + 1
-#         elif record.status == "read":
-#             sms_sent_count += sms_sent_count + 1
