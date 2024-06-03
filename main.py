@@ -283,8 +283,8 @@ class gui:
 
         log_file = "email_seen.log"
         sent_message_class = delivery_sent_messages()
-        email_seen = sent_message_class.emails_delivered_and_sent(log_file)
-        sms_delivered = sent_message_class.sms_delivered_and_sent(message_sending_obj)
+        email_seen = sent_message_class.emails_seen(log_file)
+        sms_delivered = sent_message_class.sms_delivered(message_sending_obj)
 
         sent_message_class.export_sms_to_csv(self.csvFile)
 
@@ -293,10 +293,13 @@ class gui:
         whatsapp_label = tk.Label(dashboard_tk, text="WhatsApp messages Sent & Read")
 
         email_sent_label = tk.Label(
-            dashboard_tk, text=f"Emails Sent: {email_sent}\nEmails Seen: {email_seen}"
+            dashboard_tk,
+            text=f"Emails Sent: {email_sent}\nEmails Seen: {email_seen}",
         )
         sms_sent_label = tk.Label(
-            dashboard_tk, text=f"SMS Sent: {sms_sent}\nSMS Delivered: {sms_delivered}"
+            dashboard_tk,
+            text=f"SMS Sent: {sms_sent}\nSMS Delivered: {sms_delivered}",
+        )
         whatsapp_sent_label = tk.Label(
             dashboard_tk, text=f"WhatsApp Messages Sent: {whatsapp_sent}"
         )
