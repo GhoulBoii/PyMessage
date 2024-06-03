@@ -20,27 +20,29 @@ class message_sending:
         self.email_from = email_from
         self.number_from = number_from
 
-    def send_email(self, email_to: str) -> None:
-        PLAYIT_URL = os.getenv("PLAYIT_URL")
-        email_subject = os.getenv("EMAIL_SUBJECT")
-        email_body = os.getenv("EMAIL_BODY")
-        EMAIL_HTML = f"""
-        <html>
-            <body>
-                <img src="{PLAYIT_URL}/image.png">
-            </body>
-        </html>
-            """
+    def send_email(self, email_to: str, label_name: str) -> None:
+        try:
+            PLAYIT_URL = os.getenv("PLAYIT_URL")
+            email_subject = os.getenv("EMAIL_SUBJECT")
+            email_body = os.getenv("EMAIL_BODY")
+            EMAIL_HTML = f"""
+            <html>
+                <body>
+                    <img src="{PLAYIT_URL}/image.png">
+                </body>
+            </html>
+                """
 
-        message_id = cli.send_message(
-            self.email_from,
-            email_to,
-            email_subject,
-            email_body,
-            EMAIL_HTML,
-        )
+            message = cli.send_message(
+                self.email_from,
+                email_to,
+                email_subject,
+                email_body,
+                EMAIL_HTML,
+            )
 
-        cli.add_label(message_id, "TESTLABEL")
+            cli.add_label(message["id"], label_name)
+            self.sent_email_addresses.append(email_to)
 
     def send_sms(self, number_to: str) -> None:
         TWILIO_SID = os.getenv("TWILIO_SID")
@@ -89,7 +91,8 @@ class message_sending:
             delivery_sent_messages.whatsapp_sent_count += 1
 
     def send_all(self, csvFile):
-        # FIX: store to number and email to in list and then send
+        label_name = "PyMessage"
+        cli.create_label(label_name)
         for index, row in csvFile.iterrows():
             number_to = row["Phone"]
             email_to = row["Email"]
