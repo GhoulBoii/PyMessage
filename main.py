@@ -13,16 +13,12 @@ from twilio.rest import Client
 import pymail.main as cli
 
 
-class message_sending:
+class MessageSending:
     sms_sid = []
 
     sent_email_addresses = {}
-
     sent_sms = {}
-    seen_sms = {}
-
     sent_whatsapp_numbers = {}
-    seen_whatsapp_numbers = {}
 
     email_sent_count = 0
     sms_sent_count = 0
@@ -65,19 +61,6 @@ class message_sending:
             else:
                 self.email_sent_count += 1
 
-    def seen_emails(self, log_file: str) -> int:
-        email_seen_count = 0
-        with open(log_file, "r") as file:
-            lines = file.readlines()
-
-            lines_with_200 = [
-                line.strip() for line in lines if line.endswith("200 -\n")
-            ]
-
-            for line in lines_with_200:
-                email_seen_count += 1
-        return email_seen_count
-
     def send_sms(self, numbers_to: list[str]) -> None:
         TWILIO_SID = os.getenv("TWILIO_SID")
         TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
@@ -98,18 +81,6 @@ class message_sending:
                 print(f"Error: {e}")
             else:
                 self.sms_sent_count += 1
-
-    def delivered_sms(self) -> int:
-        sms_delivered_count = 0
-        TWILIO_SID = os.getenv("TWILIO_SID")
-        TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
-        client = Client(TWILIO_SID, TWILIO_TOKEN)
-        sms_sid_dic = self.sms_sid
-        for sms_sid in sms_sid_dic:
-            message = client.messages(sms_sid).fetch()
-            if message.status == "delivered":
-                sms_delivered_count += 1
-        return sms_delivered_count
 
     def send_whatsapp_message(self, numbers_to: list[str]) -> None:
         INTERAKT_API = os.getenv("INTERAKT_API")
@@ -168,6 +139,33 @@ class message_sending:
         self.create_database(csvFile)
 
 
+class MessageStatus:
+    def seen_emails(self, log_file: str) -> int:
+        email_seen_count = 0
+        with open(log_file, "r") as file:
+            lines = file.readlines()
+
+            lines_with_200 = [
+                line.strip() for line in lines if line.endswith("200 -\n")
+            ]
+
+            for line in lines_with_200:
+                email_seen_count += 1
+        return email_seen_count
+
+    def delivered_sms(self, MessageSending) -> int:
+        sms_delivered_count = 0
+        TWILIO_SID = os.getenv("TWILIO_SID")
+        TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
+        client = Client(TWILIO_SID, TWILIO_TOKEN)
+        sms_sid_dic = MessageSending.sms_sid
+        for sms_sid in sms_sid_dic:
+            message = client.messages(sms_sid).fetch()
+            if message.status == "delivered":
+                sms_delivered_count += 1
+        return sms_delivered_count
+
+
 class gui:
     def __init__(self, root) -> None:
         self.root = root
@@ -192,7 +190,7 @@ class gui:
             )
 
     def create_widgets(self, email_from, number_from) -> None:
-        sender1 = message_sending(email_from, number_from)
+        MessageSending_obj = MessageSending(email_from, number_from)
         text_label = tk.Label(
             self.content,
             font=tkFont.Font(size=24),
@@ -206,12 +204,12 @@ class gui:
         report_button = tk.Button(
             self.content,
             text="Run Report",
-            command=lambda: sender1.send_all(self.csvFile),
+            command=lambda: MessageSending_obj.send_all(self.csvFile),
         )
         dashboard_button = tk.Button(
             self.content,
             text="Open Dashboard",
-            command=lambda: self.dashboard(email_from, number_from),
+            command=lambda: self.dashboard(email_from, number_from, MessageSending_obj),
         )
         history_button = tk.Button(
             self.content,
@@ -224,7 +222,7 @@ class gui:
         dashboard_button.grid(row=4, column=1, pady=5)
         history_button.grid(row=5, column=1, pady=5)
 
-    def dashboard(self, email_from, number_from):
+    def dashboard(self, email_from, number_from, MessageSending_obj):
         # Configuring Dashboard
         dashboard_tk = tk.Toplevel()
         dashboard_tk.rowconfigure(1, weight=1)
@@ -235,14 +233,14 @@ class gui:
         dashboard_tk.columnconfigure(3, weight=1)
         dashboard_tk.columnconfigure(4, weight=1)
 
-        email_sent = message_sending.email_sent_count
-        sms_sent = message_sending.sms_sent_count
-        whatsapp_sent = message_sending.whatsapp_sent_count
+        MessageStatus_obj = MessageStatus()
+        email_sent = MessageSending_obj.email_sent_count
+        sms_sent = MessageSending_obj.sms_sent_count
+        whatsapp_sent = MessageSending_obj.whatsapp_sent_count
 
-        # message_sending_obj = message_sending(email_from, number_from)
         LOG_FILE = "email_seen.log"
-        email_seen = message_sending.seen_emails(message_sending, LOG_FILE)
-        sms_delivered = message_sending.delivered_sms(message_sending)
+        email_seen = MessageStatus_obj.seen_emails(LOG_FILE)
+        sms_delivered = MessageStatus_obj.delivered_sms(MessageSending_obj)
 
         email_label = tk.Label(dashboard_tk, text="Emails Sent & Opened By User")
         sms_label = tk.Label(dashboard_tk, text="SMS Sent & Received")
