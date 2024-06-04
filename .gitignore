@@ -164,3 +164,4 @@ cython_debug/
 token.json
 dummy_data.csv
 credentials.json
+output.csv
