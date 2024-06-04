@@ -281,7 +281,12 @@ class gui:
         sms_sent_label.grid(row=1, column=2)
         whatsapp_sent_label.grid(row=1, column=4)
 
-    def set_threads_text(self, text_view, to_email) -> None:
+    def get_email(self, chosen_name, output_csv) -> str:
+        email = output_csv.loc[output_csv["Name"] == chosen_name, "Email"].iloc[0]
+        return email
+
+    def set_threads_text(self, text_view, chosen_name, output_csv) -> None:
+        to_email = self.get_email(chosen_name, output_csv)
         result = cli.get_threads("PyMessage", to_email)
         if not result:
             raise Exception("No valid threads returned.")
@@ -303,18 +308,20 @@ class gui:
         history_tk.columnconfigure(1, weight=1)
         history_tk.columnconfigure(2, weight=1)
 
-        username = tk.StringVar()
+        chosen_name = tk.StringVar()
 
         text_label = tk.Label(history_tk, font=tkFont.Font(size=24), text="History")
         text_view = tk.Text(history_tk)
         user_label = tk.Label(history_tk, text="Select a User: ")
-        user_combobox = ttk.Combobox(history_tk, width=27, textvariable=username)
-        # user_combobox['values'] =
-        to_email = self.get_email(username)
+        user_combobox = ttk.Combobox(history_tk, width=27, textvariable=chosen_name)
+        output_csv = pandas.read_csv("output.csv")
+        user_combobox["values"] = output_csv["Name"].tolist()
         email_button = tk.Button(
             history_tk,
             text="Get Threads",
-            command=lambda: self.set_threads_text(text_view, to_email),
+            command=lambda: self.set_threads_text(
+                text_view, chosen_name.get(), output_csv
+            ),
         )
         whatsapp_button = tk.Button(history_tk, text="Get WhatsApp Messages")
 
