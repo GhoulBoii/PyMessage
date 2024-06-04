@@ -68,6 +68,13 @@ class MessageSending:
         sms_body = os.getenv("SMS_BODY")
         for number_to in numbers_to:
             try:
+                number_to_str = str(number_to)
+                if not number_to_str.startswith("+") and len(number_to_str) == 12:
+                    number_to_str = "+" + number_to_str
+                elif len(number_to_str) == 10:
+                    number_to_str = "+91" + number_to_str
+                else:
+                    raise Exception("Invalid number")
                 print("Sending SMS")
                 message = client.messages.create(
                     body=sms_body,
@@ -93,6 +100,13 @@ class MessageSending:
         }
         for number_to in numbers_to:
             try:
+                number_to_str = str(number_to)
+                if not number_to_str.startswith("+") and len(number_to_str) == 12:
+                    number_to_str = "+" + number_to_str
+                elif len(number_to_str) == 10:
+                    number_to_str = "+91" + number_to_str
+                else:
+                    raise Exception("Invalid number")
                 payload = json.dumps(
                     {
                         "countryCode": "+91",
