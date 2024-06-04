@@ -19,7 +19,7 @@ class message_sending:
     sent_email_addresses = {}
 
     sent_sms = {}
-    seen_sms = []
+    seen_sms = {}
 
     sent_whatsapp_numbers = {}
     seen_whatsapp_numbers = {}
@@ -27,9 +27,6 @@ class message_sending:
     email_sent_count = 0
     sms_sent_count = 0
     whatsapp_sent_count = 0
-
-    email_seen_count = 0
-    sms_delivered_count = 0
 
     def __init__(self, email_from: str, number_from: str) -> None:
         self.email_from = email_from
@@ -69,8 +66,8 @@ class message_sending:
                 self.email_sent_count += 1
 
     def seen_emails(self, log_file: str) -> int:
-        LOG_FILE = "email_seen.log"
-        with open(LOG_FILE, "r") as file:
+        email_seen_count = 0
+        with open(log_file, "r") as file:
             lines = file.readlines()
 
             lines_with_200 = [
@@ -78,8 +75,8 @@ class message_sending:
             ]
 
             for line in lines_with_200:
-                self.email_seen_count += 1
-        return self.email_seen_count
+                email_seen_count += 1
+        return email_seen_count
 
     def send_sms(self, numbers_to: list[str]) -> None:
         TWILIO_SID = os.getenv("TWILIO_SID")
@@ -103,6 +100,7 @@ class message_sending:
                 self.sms_sent_count += 1
 
     def delivered_sms(self) -> int:
+        sms_delivered_count = 0
         TWILIO_SID = os.getenv("TWILIO_SID")
         TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
         client = Client(TWILIO_SID, TWILIO_TOKEN)
@@ -110,8 +108,8 @@ class message_sending:
         for sms_sid in sms_sid_dic:
             message = client.messages(sms_sid).fetch()
             if message.status == "delivered":
-                self.sms_delivered_count += 1
-                self.seen_sms.append(message.to)
+                sms_delivered_count += 1
+        return sms_delivered_count
 
     def send_whatsapp_message(self, numbers_to: list[str]) -> None:
         INTERAKT_API = os.getenv("INTERAKT_API")
@@ -149,9 +147,7 @@ class message_sending:
     def create_database(self, csvFile) -> None:
         csvFile["Email Sent"] = csvFile["Email"].map(self.sent_email_addresses)
         csvFile["SMS Sent"] = csvFile["Phone"].map(self.sent_sms)
-        csvFile["SMS Delivered"] = csvFile["Phone"].map(self.delivered_sms)
         csvFile["WhatsApp Sent"] = csvFile["Phone"].map(self.sent_whatsapp_numbers)
-        csvFile["WhatsApp Seen"] = csvFile["Phone"].map(self.seen_whatsapp_numbers)
         csvFile.to_csv("output.csv", index=False)
 
     def send_all(self, csvFile):
@@ -239,17 +235,14 @@ class gui:
         dashboard_tk.columnconfigure(3, weight=1)
         dashboard_tk.columnconfigure(4, weight=1)
 
-        message_sending_obj = message_sending(email_from, number_from)
-        email_sent = delivery_sent_messages.email_sent_count
-        sms_sent = delivery_sent_messages.sms_sent_count
-        whatsapp_sent = delivery_sent_messages.whatsapp_sent_count
+        email_sent = message_sending.email_sent_count
+        sms_sent = message_sending.sms_sent_count
+        whatsapp_sent = message_sending.whatsapp_sent_count
 
-        log_file = "email_seen.log"
-        sent_message_class = delivery_sent_messages()
-        email_seen = sent_message_class.emails_seen(log_file)
-        sms_delivered = sent_message_class.sms_delivered(message_sending_obj)
-
-        sent_message_class.export_sms_to_csv(self.csvFile)
+        # message_sending_obj = message_sending(email_from, number_from)
+        LOG_FILE = "email_seen.log"
+        email_seen = message_sending.seen_emails(message_sending, LOG_FILE)
+        sms_delivered = message_sending.delivered_sms(message_sending)
 
         email_label = tk.Label(dashboard_tk, text="Emails Sent & Opened By User")
         sms_label = tk.Label(dashboard_tk, text="SMS Sent & Received")
