@@ -323,13 +323,11 @@ class gui:
                 text_view, chosen_name.get(), output_csv
             ),
         )
-        whatsapp_button = tk.Button(history_tk, text="Get WhatsApp Messages")
 
         text_label.grid(row=0, column=1, pady=30)
-        user_label.grid(row=1, column=0)
-        user_combobox.grid(row=2, column=0)
-        email_button.grid(row=3, column=0)
-        whatsapp_button.grid(row=3, column=2, padx=5)
+        user_label.grid(row=1, column=1)
+        user_combobox.grid(row=2, column=1)
+        email_button.grid(row=3, column=1)
         text_view.grid(row=4, column=1)
 
 
