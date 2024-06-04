@@ -148,7 +148,7 @@ class MessageSending:
         self.send_sms(numbers_to)
 
         # Send Whatsapp Msg
-        # self.send_whatsapp_message(numbers_to)
+        self.send_whatsapp_message(numbers_to)
 
         self.create_database(csvFile)
 
