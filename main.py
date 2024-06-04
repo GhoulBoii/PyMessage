@@ -92,7 +92,7 @@ class MessageSending:
     def send_whatsapp_message(self, numbers_to: list[str]) -> None:
         INTERAKT_API = os.getenv("INTERAKT_API")
         TEMPLATE_NAME = os.getenv("TEMPLATE_NAME")
-        TEMPLATE_BODY_VALUES = os.getenv("TEMPLATE_BODY_VALUES")
+        TEMPLATE_BODY_VALUES = json.loads(os.getenv("TEMPLATE_BODY_VALUES"))
         url = "https://api.interakt.ai/v1/public/message/"
         headers = {
             "Authorization": "Basic {{" + INTERAKT_API + "}}",
@@ -109,14 +109,13 @@ class MessageSending:
                     raise Exception("Invalid number")
                 payload = json.dumps(
                     {
-                        "countryCode": "+91",
-                        "phoneNumber": f"{number_to}",
+                        "fullPhoneNumber": f"{number_to_str}",
                         "callbackData": "some text here",
                         "type": "Template",
                         "template": {
                             "name": f"{TEMPLATE_NAME}",
                             "languageCode": "en",
-                            "bodyValues": f"{TEMPLATE_BODY_VALUES}",
+                            "bodyValues": TEMPLATE_BODY_VALUES,
                         },
                     }
                 )
