@@ -79,14 +79,14 @@ class MessageSending:
                 message = client.messages.create(
                     body=sms_body,
                     from_=self.number_from,
-                    to=number_to,
+                    to=number_to_str,
                 )
                 self.sms_sid.append(message.sid)
-                self.sent_sms[number_to] = "Sent"
             except Exception as e:
                 self.sent_sms[number_to] = "Not Sent"
                 print(f"Error: {e}")
             else:
+                self.sent_sms[number_to] = "Sent"
                 self.sms_sent_count += 1
 
     def send_whatsapp_message(self, numbers_to: list[str]) -> None:
@@ -122,11 +122,11 @@ class MessageSending:
                 )
                 response = requests.request("POST", url, headers=headers, data=payload)
                 print(response.text)
-                self.sent_whatsapp_numbers[number_to] = "Sent"
             except Exception as e:
                 self.sent_whatsapp_numbers[number_to] = "Not Sent"
                 print(f"Error: {e}")
             else:
+                self.sent_whatsapp_numbers[number_to] = "Sent"
                 self.whatsapp_sent_count += 1
 
     def create_database(self, csvFile) -> None:
