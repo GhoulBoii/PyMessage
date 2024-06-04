@@ -294,7 +294,8 @@ class gui:
         to_email = self.get_email(chosen_name, output_csv)
         result = cli.get_threads("PyMessage", to_email)
         if not result:
-            raise Exception("No valid threads returned.")
+            print("No valid threads returned. Threads must have >1 emails in them.")
+            text_view.insert("1.0", "No threads found with >1 emails.")
         formatted_str = ""
         for email in result:
             formatted_str += f"{email["subject"]}\n\n{email["body"]}\n\n{"-"*50}\n\n"
