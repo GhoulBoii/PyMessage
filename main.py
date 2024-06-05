@@ -11,7 +11,7 @@ import requests
 from dotenv import load_dotenv
 from twilio.rest import Client
 
-import pymail.main as cli
+import pymailcli.main as cli
 
 
 class MessageSending:
