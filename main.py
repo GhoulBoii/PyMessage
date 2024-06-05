@@ -28,7 +28,8 @@ class MessageSending:
         self.sms_sent_count = 0
         self.whatsapp_sent_count = 0
 
-    def send_email(self, emails_to: list[str], label_name: str) -> None:
+    def send_email(self, emails_to: list[str]) -> None:
+        service = cli.build_service()
         PLAYIT_URL = os.getenv("PLAYIT_URL")
         EMAIL_SUBJECT = os.getenv("EMAIL_SUBJECT")
         EMAIL_BODY = os.getenv("EMAIL_BODY")
@@ -40,9 +41,12 @@ class MessageSending:
         </html>
         """
 
+        label_name = "PyMessage"
+        cli.create_label(service, label_name)
         for email_to in emails_to:
             try:
                 message = cli.send_message(
+                    service,
                     self.email_from,
                     email_to,
                     EMAIL_SUBJECT,
@@ -50,8 +54,8 @@ class MessageSending:
                     EMAIL_HTML,
                 )
 
-                cli.add_label(message["id"], label_name)
-                cli.check_email_bounced_status(message["id"])
+                cli.add_label(service, message["id"], label_name)
+                cli.check_email_bounced_status(service, message["id"])
                 self.sent_email_addresses[email_to] = "Sent"
                 print("Email sent to:", email_to)
 
@@ -139,12 +143,10 @@ class MessageSending:
         csvFile.to_csv("output.csv", index=False)
 
     def send_all(self, csvFile: pd.DataFrame) -> None:
-        label_name = "PyMessage"
-        cli.create_label(label_name)
         numbers_to = csvFile["Phone"].tolist()
         emails_to = csvFile["Email"].tolist()
 
-        self.send_email(emails_to, label_name)
+        self.send_email(emails_to)
         self.send_sms(numbers_to)
         self.send_whatsapp_message(numbers_to)
         self.create_database(csvFile)
