@@ -297,7 +297,7 @@ class gui:
             text_view.insert("1.0", "No threads found with >1 emails.")
         formatted_str = ""
         for email in result:
-            formatted_str += f"{email["subject"]}\n\n{email["body"]}\n\n{"-"*50}\n\n"
+            formatted_str += f"{email['subject']}\n\n{email['body']}\n\n{'-'*50}\n\n"
 
         text_view.delete("1.0", tk.END)
         text_view.insert("1.0", formatted_str)
