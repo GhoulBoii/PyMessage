@@ -5,16 +5,15 @@
   <img src="https://github.com/GhoulBoii/PyMessage/assets/78494833/36b54b52-5cf2-4533-89ac-5f68e472906f" />
 </p>
 
-## Getting Started
 
-### Prerequisites
+## Prerequisites
 
-- python 3.12+ [Not tested on older versions]
-- [credentials.json](https://developers.google.com/gmail/api/quickstart/python) [Used for sending emails and display threads]
-- [Paid Twilio Account](https://help.twilio.com/articles/223183208-Upgrading-to-a-paid-Twilio-Account) [Used for sending SMS]
+- python 3.12+ [**Not tested on older versions**]
+- [credentials.json](https://developers.google.com/gmail/api/quickstart/python) [**Used for sending emails and display threads**]
+- [Paid Twilio Account](https://help.twilio.com/articles/223183208-Upgrading-to-a-paid-Twilio-Account) [**Used for sending SMS**]
 - [playit](https://playit.gg/) [**Optional, Used for seeing Seen Emails**]
 
-### Installation
+## Installation
 
 1. Clone the repo
 ```sh
@@ -50,3 +49,9 @@ The application only accepts CSV files. The CSV file should be of the following 
 > [!NOTE]
 > Phone can be written with or without area code
 
+# Credits
+
+- [Interakt](https://www.interakt.shop/)
+- [Twilio](https://www.twilio.com/en-us)
+- [Python Quickstart](https://developers.google.com/gmail/api/quickstart/python)
+-
