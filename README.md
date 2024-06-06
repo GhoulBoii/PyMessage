@@ -1,10 +1,13 @@
 <a name="readme-top"></a>
 <h1 align="center"> 🐍 PyMessage 📬 </h1>
-<h4 align="center">Python application to send emails, SMS and WhatsApp message on the click of a button</h6>
+<h3 align="center">Multichannel Messaging Automator</h3>
 
 <p align="center">
   <img src="https://github.com/GhoulBoii/PyMessage/assets/78494833/36b54b52-5cf2-4533-89ac-5f68e472906f" />
 </p>
+
+# About The Project
+Python application to send emails, SMS and WhatsApp message on the click of a button. You also can see the total count of sent and seen messages and read through threads of each user.
 
 <!-- TABLE OF CONTENTS -->
 <details>
