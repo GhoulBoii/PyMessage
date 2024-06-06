@@ -192,7 +192,7 @@ class Gui:
         self.root.geometry("500x600")
         self.content.place(relx=0.5, rely=0.5, anchor="center")
 
-    def input_excel(self) -> None:
+    def input_file(self) -> None:
         file = askopenfile(
             initialdir=".",
             title="Select a File",
@@ -223,7 +223,7 @@ class Gui:
         input_button = tk.Button(
             self.content,
             text="Input",
-            command=self.input_excel,
+            command=self.input_file,
         )
         report_button = tk.Button(
             self.content,
