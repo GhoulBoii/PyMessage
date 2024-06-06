@@ -29,7 +29,13 @@ class MessageSending:
         self.whatsapp_sent_count = 0
 
     def send_email(self, emails_to: list[str]) -> None:
-        service = cli.build_service()
+        try:
+            service = cli.build_service()
+        except FileNotFoundError:
+            messagebox.showerror(
+                "Error",
+                "credentials.json does not exist. Download it from Google Cloud Console and move it to the project root.",
+            )
         PLAYIT_URL = os.getenv("PLAYIT_URL")
         EMAIL_SUBJECT = os.getenv("EMAIL_SUBJECT")
         EMAIL_BODY = os.getenv("EMAIL_BODY")
