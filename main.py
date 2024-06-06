@@ -42,7 +42,7 @@ class MessageSending:
         EMAIL_HTML = f"""
         <html>
             <body>
-                <img src="{PLAYIT_URL}/image.png">
+                <img src='{PLAYIT_URL}/image.png'>
             </body>
         </html>
         """
@@ -365,6 +365,9 @@ class Gui:
 
 def main() -> None:
     load_dotenv()
+    root = tk.Tk()
+    main_window = Gui(root)
+    
     required_env_vars = [
         "FROM_EMAIL",
         "FROM_NUMBER",
@@ -378,15 +381,16 @@ def main() -> None:
     ]
     missing_vars = [var for var in required_env_vars if not os.getenv(var)]
     if missing_vars:
+        messagebox.showerror("Error", f"One or more required environment variables are missing: {', '.join(missing_vars)}")
         raise ValueError(
             f"One or more required environment variables are missing: {', '.join(missing_vars)}"
         )
+        
 
-    root = tk.Tk()
-    main_window = Gui(root)
     main_window.create_widgets(os.getenv("FROM_EMAIL"), os.getenv("FROM_NUMBER"))
     root.mainloop()
 
 
 if __name__ == "__main__":
     main()
+
