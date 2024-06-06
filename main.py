@@ -307,7 +307,8 @@ class Gui:
         self, text_view: tk.Text, chosen_name: str, output_csv: pd.DataFrame
     ) -> None:
         to_email = self.get_email(chosen_name, output_csv)
-        result = cli.get_threads("PyMessage", to_email)
+        service = cli.build_service()
+        result = cli.get_threads(service, "PyMessage", to_email)
         if not result:
             print("No valid threads returned. Threads must have >1 emails in them.")
             text_view.insert("1.0", "No threads found with >1 emails.")
