@@ -1,5 +1,5 @@
 <h1 align="center"> 🐍 PyMessage 📬 </h1>
-<h4 align="center">Python application to send emails, sms and whatsapp message on the click of a button</h6>
+<h4 align="center">Python application to send emails, SMS and WhatsApp message on the click of a button</h6>
 
 <p align="center">
   <img src="https://github.com/GhoulBoii/PyMessage/assets/78494833/36b54b52-5cf2-4533-89ac-5f68e472906f" />
@@ -51,7 +51,7 @@ The application only accepts CSV files. The CSV file should be of the following 
 
 # Credits
 
-- [Interakt](https://www.interakt.shop/)
-- [Twilio](https://www.twilio.com/en-us)
-- [Python Quickstart](https://developers.google.com/gmail/api/quickstart/python)
--
+- [Interakt](https://www.interakt.shop/) for sending messages through WhatsApp
+- [Twilio](https://www.twilio.com/en-us) for sending and receiving SMS
+- [Python Quickstart](https://developers.google.com/gmail/api/quickstart/python) for sending emails and reading threads
+- [Ethan's Tech](https://ethans.co.in/) for providing me tools to complete this project
