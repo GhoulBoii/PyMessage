@@ -1,3 +1,4 @@
+<a name="readme-top"></a>
 <h1 align="center"> 🐍 PyMessage 📬 </h1>
 <h4 align="center">Python application to send emails, SMS and WhatsApp message on the click of a button</h6>
 
@@ -5,15 +6,26 @@
   <img src="https://github.com/GhoulBoii/PyMessage/assets/78494833/36b54b52-5cf2-4533-89ac-5f68e472906f" />
 </p>
 
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#installation">Installation</a></li>
+    <li><a href="#format-of-inputted-csv-file">Format of Inputted CSV File</a></li>
+    <li><a href="#credits">Credits</a></li>
+  </ol>
+</details>
 
-## Prerequisites
+# Prerequisites
 
 - python 3.12+ [**Not tested on older versions**]
 - [credentials.json](https://developers.google.com/gmail/api/quickstart/python) [**Used for sending emails and display threads**]
 - [Paid Twilio Account](https://help.twilio.com/articles/223183208-Upgrading-to-a-paid-Twilio-Account) [**Used for sending SMS**]
 - [playit](https://playit.gg/) [**Optional, Used for seeing Seen Emails**]
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Installation
+# Installation
 
 1. Clone the repo
 ```sh
@@ -36,8 +48,9 @@ git submodule update
 5. Place credentials.json into the root of the project
 
 6. Run main.py
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Format of Inputted CSV File
+# Format of Inputted CSV File
 
 The application only accepts CSV files. The CSV file should be of the following format:
 
@@ -48,6 +61,7 @@ The application only accepts CSV files. The CSV file should be of the following 
 
 > [!NOTE]
 > Phone can be written with or without area code
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Credits
 
@@ -55,3 +69,4 @@ The application only accepts CSV files. The CSV file should be of the following 
 - [Twilio](https://www.twilio.com/en-us) for sending and receiving SMS
 - [Python Quickstart](https://developers.google.com/gmail/api/quickstart/python) for sending emails and reading threads
 - [Ethan's Tech](https://ethans.co.in/) for providing me tools to complete this project
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
