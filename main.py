@@ -55,12 +55,12 @@ class MessageSending:
 
                 cli.add_label(service, message["id"], label_name)
                 cli.check_email_bounced_status(service, message["id"])
-                self.sent_email_addresses[email_to] = "Sent"
-                print("Email sent to:", email_to)
-
             except Exception as e:
                 self.sent_email_addresses[email_to] = "Not Sent"
                 print(f"Error: {e}")
+            else:
+                self.sent_email_addresses[email_to] = "Sent"
+                print("Email sent to:", email_to)
 
     def send_sms(self, numbers_to: list[str]) -> None:
         TWILIO_SID = os.getenv("TWILIO_SID")
