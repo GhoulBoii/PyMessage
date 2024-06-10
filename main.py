@@ -130,12 +130,16 @@ class MessageSending:
                 print(f"Error: {e}")
             else:
                 self.sent_whatsapp_numbers[number_to] = "Sent"
+    def create_database(self, csv_file: pd.DataFrame) -> None:
 
-    def create_database(self, csvFile: pd.DataFrame) -> None:
-        csvFile["Email Sent"] = csvFile["Email"].map(self.sent_email_addresses)
-        csvFile["SMS Sent"] = csvFile["Phone"].map(self.sent_sms)
-        csvFile["WhatsApp Sent"] = csvFile["Phone"].map(self.sent_whatsapp_numbers)
-        csvFile.to_csv("output.csv", index=False)
+    def create_database(self, csv_file: pd.DataFrame) -> None:
+        csv_file["Email Sent"] = csv_file["Email"].map(self.sent_email_addresses)
+        csv_file["SMS Sent"] = csv_file["Phone"].map(self.sent_sms)
+        csv_file["WhatsApp Sent"] = csv_file["Phone"].map(self.sent_whatsapp_numbers)
+        # TODO: Check for duplicate entries and filter them out
+        csv_file.to_csv(
+            "output.csv", mode="a", header=not os.path.exists("output.csv"), index=False
+        )
 
     def send_all(self, csvFile: pd.DataFrame) -> None:
         numbers_to = csvFile["Phone"].tolist()
