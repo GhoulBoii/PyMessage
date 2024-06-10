@@ -78,18 +78,18 @@ class MessageSending:
                 else:
                     raise ValueError("Invalid number")
 
-                print("Sending SMS")
                 message = client.messages.create(
                     body=sms_body,
                     from_=self.number_from,
                     to=number_to_str,
                 )
-                self.sms_sid.append(message.sid)
             except Exception as e:
                 self.sent_sms[number_to] = "Not Sent"
                 print(f"Error: {e}")
             else:
                 self.sent_sms[number_to] = "Sent"
+                self.sms_sid.append(message.sid)
+                print(f"SMS sent to {number_to}")
 
     def send_whatsapp_message(self, numbers_to: list[str]) -> None:
         INTERAKT_API = os.getenv("INTERAKT_API")
