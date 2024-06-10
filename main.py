@@ -141,14 +141,15 @@ class MessageSending:
             "output.csv", mode="a", header=not os.path.exists("output.csv"), index=False
         )
 
-    def send_all(self, csvFile: pd.DataFrame) -> None:
-        numbers_to = csvFile["Phone"].tolist()
-        emails_to = csvFile["Email"].tolist()
+    def send_all(self, csv_file: pd.DataFrame) -> None:
+        numbers_to = csv_file["Phone"].tolist()
+        emails_to = csv_file["Email"].tolist()
 
         self.send_email(emails_to)
         self.send_sms(numbers_to)
         self.send_whatsapp_message(numbers_to)
-        self.create_database(csvFile)
+
+        self.create_database(csv_file)
 
 
 class MessageStatus:
@@ -214,7 +215,7 @@ class Gui:
         )
 
         try:
-            self.csvFile = pd.read_csv(file)
+            self.csv_file = pd.read_csv(file)
             messagebox.showinfo("Info", "CSV Initialized!")
         except (ValueError, FileNotFoundError):
             messagebox.showerror(
@@ -242,7 +243,7 @@ class Gui:
         report_button = tk.Button(
             self.content,
             text="Run Report",
-            command=lambda: message_sending.send_all(self.csvFile),
+            command=lambda: message_sending.send_all(self.csv_file),
         )
         dashboard_button = tk.Button(
             self.content,
