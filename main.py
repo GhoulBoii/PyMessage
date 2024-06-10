@@ -278,14 +278,13 @@ class Gui:
 
         output_csv = pd.read_csv("output.csv")
 
-        message_status = MessageStatus()
-        email_sent = message_status.sent_emails(output_csv)
-        sms_sent = message_status.sent_sms(output_csv)
-        whatsapp_sent = message_status.sent_whatsapp(output_csv)
+        email_sent = MessageStatus.sent_emails(output_csv)
+        sms_sent = MessageStatus.sent_sms(output_csv)
+        whatsapp_sent = MessageStatus.sent_whatsapp(output_csv)
 
         LOG_FILE = "email_seen.log"
-        email_seen = message_status.seen_emails(LOG_FILE)
-        sms_delivered = message_status.delivered_sms(message_sending)
+        email_seen = MessageStatus.seen_emails(LOG_FILE)
+        sms_delivered = MessageStatus.delivered_sms(message_sending)
 
         email_label = tk.Label(dashboard_tk, text="Emails Sent & Opened By User")
         sms_label = tk.Label(dashboard_tk, text="SMS Sent & Received")
