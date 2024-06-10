@@ -1,10 +1,7 @@
 import json
 import os
 import tkinter as tk
-import tkinter.font as tkFont
-from tkinter import ttk
-from tkinter.filedialog import askopenfile
-from tkinter import messagebox
+from tkinter import filedialog, font, messagebox, ttk
 
 import pandas as pd
 import requests
@@ -206,7 +203,7 @@ class Gui:
         self.content.place(relx=0.5, rely=0.5, anchor="center")
 
     def input_file(self) -> None:
-        file = askopenfile(
+        file = filedialog.askopenfile(
             initialdir=".",
             title="Select a File",
             filetypes=(("CSV Files", "*.csv"), ("All files", "*.*")),
@@ -224,13 +221,13 @@ class Gui:
         message_sending = MessageSending(email_from, number_from)
         text_label = tk.Label(
             self.content,
-            font=tkFont.Font(size=24),
+            font=font.Font(size=24),
             text="Welcome to PyMessage!",
         )
         instructions_text = tk.Label(
             self.content,
             text="Input a CSV file and then Run Report. All statistics will be displayed in the Dashboard and thread messages can be browsed through History. Enjoy :)",
-            font=tkFont.Font(size=10),
+            font=font.Font(size=10),
             wraplength=300,
         )
         input_button = tk.Button(
@@ -351,7 +348,7 @@ class Gui:
 
         chosen_name = tk.StringVar()
 
-        text_label = tk.Label(history_tk, font=tkFont.Font(size=24), text="History")
+        text_label = tk.Label(history_tk, font=font.Font(size=24), text="History")
         text_view = tk.Text(history_tk)
         user_label = tk.Label(history_tk, text="Select a User: ")
         user_combobox = ttk.Combobox(history_tk, width=27, textvariable=chosen_name)
