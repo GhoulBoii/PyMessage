@@ -136,6 +136,7 @@ class MessageSending:
     #     output_csv = pd.read_csv(output_file)
     #     output_csv = output_file.drop_duplicates(subset="Phone", inplace=True)
     #     output_csv.to_csv(output_file, index=False)
+
     def create_database(self, csv_file: pd.DataFrame) -> None:
         output_file = "output.csv"
         csv_file["Email Sent"] = csv_file["Email"].map(self.sent_email_addresses)
@@ -147,8 +148,18 @@ class MessageSending:
         # self.check_duplicates_in_database(output_file)
 
     def send_all(self, csv_file: pd.DataFrame) -> None:
-        numbers_to = csv_file["Phone"].tolist()
-        emails_to = csv_file["Email"].tolist()
+        if os.path.exists("output.csv"):
+            output_file = pd.read_csv("output.csv")
+        else:
+            header_list = csv_file.columns.tolist()
+            header_string = ",".join(header_list)
+            with open("output.csv", "w") as file:
+                file.write(header_string)
+
+        numbers_comparison = csv_file["Phone"].isin(output_file["Phone"])
+        numbers_to = (csv_file[~numbers_comparison]["Phone"]).tolist()
+        emails_comparison = csv_file["Email"].isin(output_file["Email"])
+        emails_to = (csv_file[~emails_comparison]["Email"]).tolist()
 
         self.send_email(emails_to)
         self.send_sms(numbers_to)
@@ -355,12 +366,12 @@ class Gui:
         history_tk.columnconfigure(1, weight=1)
 
         chosen_name = tk.StringVar()
+        output_csv = pd.read_csv("output.csv")
 
         text_label = tk.Label(history_tk, font=font.Font(size=24), text="History")
         text_view = tk.Text(history_tk)
         user_label = tk.Label(history_tk, text="Select a User: ")
         user_combobox = ttk.Combobox(history_tk, width=27, textvariable=chosen_name)
-        output_csv = pd.read_csv("output.csv")
         user_combobox["values"] = output_csv["Name"].tolist()
         email_button = tk.Button(
             history_tk,
