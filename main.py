@@ -24,10 +24,6 @@ class MessageSending:
         self.sent_sms = {}
         self.sent_whatsapp_numbers = {}
 
-        self.email_sent_count = 0
-        self.sms_sent_count = 0
-        self.whatsapp_sent_count = 0
-
     def send_email(self, emails_to: list[str]) -> None:
         service = cli.build_service()
         PLAYIT_URL = os.getenv("PLAYIT_URL")
@@ -62,8 +58,6 @@ class MessageSending:
             except Exception as e:
                 self.sent_email_addresses[email_to] = "Not Sent"
                 print(f"Error: {e}")
-            else:
-                self.email_sent_count += 1
 
     def send_sms(self, numbers_to: list[str]) -> None:
         TWILIO_SID = os.getenv("TWILIO_SID")
@@ -93,7 +87,6 @@ class MessageSending:
                 print(f"Error: {e}")
             else:
                 self.sent_sms[number_to] = "Sent"
-                self.sms_sent_count += 1
 
     def send_whatsapp_message(self, numbers_to: list[str]) -> None:
         INTERAKT_API = os.getenv("INTERAKT_API")
@@ -134,7 +127,6 @@ class MessageSending:
                 print(f"Error: {e}")
             else:
                 self.sent_whatsapp_numbers[number_to] = "Sent"
-                self.whatsapp_sent_count += 1
 
     def create_database(self, csvFile: pd.DataFrame) -> None:
         csvFile["Email Sent"] = csvFile["Email"].map(self.sent_email_addresses)
@@ -154,6 +146,11 @@ class MessageSending:
 
 class MessageStatus:
     @staticmethod
+    def sent_emails(output_csv: pd.DataFrame) -> int:
+        email_sent_count = output_csv["Email Sent"].value_counts().get("Sent", 0)
+        return email_sent_count
+
+    @staticmethod
     def seen_emails(log_file: str) -> int:
         email_seen_count = 0
         try:
@@ -171,6 +168,11 @@ class MessageStatus:
         return email_seen_count
 
     @staticmethod
+    def sent_sms(output_csv: pd.DataFrame) -> int:
+        sms_sent_count = output_csv["SMS Sent"].value_counts().get("Sent", 0)
+        return sms_sent_count
+
+    @staticmethod
     def delivered_sms(message_sending: MessageSending) -> int:
         sms_delivered_count = 0
         TWILIO_SID = os.getenv("TWILIO_SID")
@@ -181,6 +183,11 @@ class MessageStatus:
             if message.status == "delivered":
                 sms_delivered_count += 1
         return sms_delivered_count
+
+    @staticmethod
+    def sent_whatsapp(output_csv: pd.DataFrame) -> int:
+        sent_whatsapp_count = output_csv["WhatsApp Sent"].value_counts().get("Sent", 0)
+        return sent_whatsapp_count
 
 
 class Gui:
@@ -261,10 +268,12 @@ class Gui:
         dashboard_tk.columnconfigure(3, weight=1)
         dashboard_tk.columnconfigure(4, weight=1)
 
+        output_csv = pd.read_csv("output.csv")
+
         message_status = MessageStatus()
-        email_sent = message_sending.email_sent_count
-        sms_sent = message_sending.sms_sent_count
-        whatsapp_sent = message_sending.whatsapp_sent_count
+        email_sent = message_status.sent_emails(output_csv)
+        sms_sent = message_status.sent_sms(output_csv)
+        whatsapp_sent = message_status.sent_whatsapp(output_csv)
 
         LOG_FILE = "email_seen.log"
         email_seen = message_status.seen_emails(LOG_FILE)
