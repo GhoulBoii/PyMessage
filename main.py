@@ -349,7 +349,6 @@ class Gui:
         history_tk.rowconfigure(4, weight=1)
         history_tk.columnconfigure(0, weight=1)
         history_tk.columnconfigure(1, weight=1)
-        history_tk.columnconfigure(2, weight=1)
 
         chosen_name = tk.StringVar()
 
@@ -378,25 +377,25 @@ def main() -> None:
     load_dotenv()
     root = tk.Tk()
     main_window = Gui(root)
-    
+
     required_env_vars = [
         "FROM_EMAIL",
         "FROM_NUMBER",
         "TWILIO_SID",
         "TWILIO_TOKEN",
+        "SMS_BODY",
         "PLAYIT_URL",
         "EMAIL_SUBJECT",
         "EMAIL_BODY",
-        "SMS_BODY",
         "INTERAKT_API",
+        "TEMPLATE_NAME",
+        "TEMPLATE_BODY_VALUES",
     ]
     missing_vars = [var for var in required_env_vars if not os.getenv(var)]
     if missing_vars:
-        messagebox.showerror("Error", f"One or more required environment variables are missing: {', '.join(missing_vars)}")
-        raise ValueError(
-            f"One or more required environment variables are missing: {', '.join(missing_vars)}"
-        )
-        
+        missing_vars_msg = f"One or more required environment variables are missing: {', '.join(missing_vars)}"
+        messagebox.showerror("Error", missing_vars_msg)
+        raise ValueError(missing_vars_msg)
 
     main_window.create_widgets(os.getenv("FROM_EMAIL"), os.getenv("FROM_NUMBER"))
     root.mainloop()
@@ -404,4 +403,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
